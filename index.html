@@ -165,6 +165,15 @@
     </div>
   </div>
 <script>
+  const originalFetch = window.fetch;
+const basePath = "/oneshotthing/";
+window.fetch = function(...args) {
+    let [url, options] = args;
+    if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//')) {
+        url = basePath + url.substring(1);
+    }
+    return originalFetch.call(this, url, options);
+};
  window.i18next = {
     t: function(key) {
         return key;
