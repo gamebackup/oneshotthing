@@ -165,15 +165,6 @@
     </div>
   </div>
 <script>
-  const originalFetch = window.fetch;
-const basePath = "/oneshotthing/";
-window.fetch = function(...args) {
-    let [url, options] = args;
-    if (typeof url === 'string' && url.startsWith('/') && !url.startsWith('//')) {
-        url = basePath + url.substring(1);
-    }
-    return originalFetch.call(this, url, options);
-};
  window.i18next = {
     t: function(key) {
         return key;
@@ -228,7 +219,7 @@ setTimeout(() => {
   maybebadwifi();
 </script>
     <div class="load" id="load">
-      <img src="images/load/niko-oneshot.gif" alt="load">
+      <img src="/images/load/niko-oneshot.gif" alt="load">
       <h1> loading time woahhhh</h1>
       <p> port by arandomiperson on discord </p>
         <p> credits to YNOProject's team for their work on the web port of legacy oneshot. </p>
@@ -267,7 +258,7 @@ window.addEventListener('load', (event) => {
     console.log('window.createEasyRpgPlayer:', window.createEasyRpgPlayer);
     
     createEasyRpgPlayer({
-      game: undefined,
+      game: "/oneshotthing/data/default/",
       saveFs: undefined
     }).then(function(Module) {
       // Module is ready

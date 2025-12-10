@@ -1,8 +1,4 @@
-var path = window.location.pathname;
-  if (!path.endsWith('/')) {
-    path += '/';
-  }
-  document.write('<base href="' + path + '" />');
+
 var createEasyRpgPlayer = (() => {
   var _scriptName = typeof document != 'undefined' ? document.currentScript?.src : undefined;
   if (typeof __filename != 'undefined') _scriptName = _scriptName || __filename;
