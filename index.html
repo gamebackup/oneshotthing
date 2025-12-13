@@ -234,6 +234,12 @@ setTimeout(() => {
 <div id="connStatusIcon"></div>
 <div id="connStatusText"></div>
 </div>
+<div id="viewport">
+    <canvas id="canvas"></canvas>
+    </div>
+<div id="controls">
+    <button id="controls-fullscreen">Fullscreen</button>
+</div>
 <script type="text/javascript" src="stupidpatch.js"></script>
 <script type="text/javascript" src="preloads.js"></script>
 <script type="text/javascript" src="thing.js"></script> 
@@ -258,8 +264,9 @@ window.addEventListener('load', (event) => {
     console.log('window.createEasyRpgPlayer:', window.createEasyRpgPlayer);
     
     createEasyRpgPlayer({
-      game: "/oneshotthing/data/default/",
-      saveFs: undefined
+      game: undefined,
+      saveFs: undefined,
+      basePath: './',
     }).then(function(Module) {
       // Module is ready
       easyrpgPlayer = Module;
