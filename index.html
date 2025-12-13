@@ -267,6 +267,9 @@ window.addEventListener('load', (event) => {
       game: undefined,
       saveFs: undefined,
       basePath: './',
+      locateFile: function(path) {
+            return 'oneshotthing/' + path;
+        }
     }).then(function(Module) {
       // Module is ready
       easyrpgPlayer = Module;
