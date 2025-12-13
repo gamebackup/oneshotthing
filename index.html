@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <base href="https://rawcdn.githack.com/67-Factory/oneshotthing/bb514b5b2425f58128f8333bad295f01d1130854/index.html">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="2kkiVersion" content="1.11g">
@@ -165,6 +166,13 @@
     </div>
   </div>
 <script>
+
+ const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+          url = url.startsWith("/") ? url.replace("/", "") : url;
+          
+          return originalOpen.call(this, method, url, ...rest);
+      };
  window.i18next = {
     t: function(key) {
         return key;
@@ -276,7 +284,7 @@ window.addEventListener('load', (event) => {
       game: undefined,
       saveFs: undefined,
       locateFile: function(path, prefix) {
-          return '/oneshotthing/' + path;
+          return '/' + path;
       }
     }).then(function(Module) {
       // Module is ready
