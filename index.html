@@ -267,6 +267,7 @@ window.addEventListener('load', (event) => {
     createEasyRpgPlayer({
       game: undefined,
       saveFs: undefined,
+      basename: '/oneshotthing/',
     }).then(function(Module) {
       // Module is ready
       easyrpgPlayer = Module;
@@ -280,7 +281,7 @@ window.addEventListener('load', (event) => {
         // Set volumes to maximum
         easyrpgPlayer.api.setMusicVolume(100);
         easyrpgPlayer.api.setSoundVolume(100);
-        console.log('✓ Audio volumes set to 100%');
+        console.log('j');
       } catch(e) {
         console.error('Failed to set volumes:', e);
       }
@@ -296,10 +297,10 @@ window.addEventListener('load', (event) => {
           if (easyrpgPlayer.SDL2 && easyrpgPlayer.SDL2.audioContext) {
             if (easyrpgPlayer.SDL2.audioContext.state === 'suspended') {
               easyrpgPlayer.SDL2.audioContext.resume().then(() => {
-                console.log('✓ SDL2 AudioContext resumed');
+                console.log(' SDL2 AudioContext resumed');
               });
             } else {
-              console.log('✓ SDL2 AudioContext already running');
+              console.log(' SDL2 AudioContext already running');
             }
           }
           
@@ -308,7 +309,7 @@ window.addEventListener('load', (event) => {
           easyrpgPlayer.api.setSoundVolume(100);
           
           audioInitialized = true;
-          console.log('✓ Audio system fully initialized');
+          console.log(' Audio system fully initialized');
         } catch (err) {
           console.error('Failed to initialize audio:', err);
         }
