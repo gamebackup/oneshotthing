@@ -260,9 +260,13 @@ let lastTouchedId;
 
 // Launch the Player and configure it
 window.addEventListener('load', (event) => {
-       const originalFetch = window.fetch;
+      const originalFetch = window.fetch;
       window.fetch = async function (input, init) {
-        input = input.startsWith("/") ? input.replace("/", "") : input;
+        if (input instanceof Request) {
+          input.url = input.url.startsWith("/") ? input.url.replace("/", "") : input.url;
+        } else {
+          input = input.startsWith("/") ? input.replace("/", "") : input;
+        }
         return originalFetch(input, init);
       };
     console.log('typeof createEasyRpgPlayer:', typeof createEasyRpgPlayer);
