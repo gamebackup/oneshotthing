@@ -522,6 +522,11 @@ if (hasTouchscreen) {
   }
 } else {
   // Prevent scrolling when pressing specific keys
+
+  // canvas.addEventListener('click', () => {
+  //   simulateKeyboardInput('Enter', 13);
+  // });
+}
   window.addEventListener('keydown', event => {
     if (preventNativeKeys.includes(event.key)) {
       event.preventDefault();
@@ -532,12 +537,6 @@ if (hasTouchscreen) {
     event.preventDefault();
     // simulateKeyboardInput('Escape', 27);
   });
-
-  // canvas.addEventListener('click', () => {
-  //   simulateKeyboardInput('Enter', 13);
-  // });
-}
-
 updateTouchControlsVisibility();
 </script>
 
