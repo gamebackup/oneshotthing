@@ -1,14 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
- 
-  <base href="https://rawcdn.githack.com/67-Factory/oneshotthing/bb514b5b2425f58128f8333bad295f01d1130854/index.html">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="2kkiVersion" content="1.11g">
-  <title>Oneshot Legacy</title>
+  <title>EasyRPG Player</title>
   <style>
-    
     :root {
       --color-gray: hsl(0, 0%, 55%);
       --controls-size: 10vh;
@@ -122,27 +118,12 @@
     #apad > *:not(.active) {
       opacity: 0.4;
     }
-    .load {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: black;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
-    }
   </style>
 </head>
 <body>
   <div id="controls">
-    <button id="clearSaveSyncButton" class="unselectable">
-</button>
     <button id="controls-fullscreen" class="unselectable">
-      <svg viewBox="0 0 15 15" fill="none" xmlns="https://static.wikia.nocookie.net/oneshot/images/1/1f/Niko_WME.jpg/revision/latest?cb=20220925190751" width="25" height="25"><path d="M13.5 13.5H10m3.5 0V10m0 3.5l-4-4m.5-8h3.5m0 0V5m0-3.5l-4 4M5 1.5H1.5m0 0V5m0-3.5l4 4m-4 4.5v3.5m0 0H5m-3.5 0l4-4" stroke="currentColor"></path></svg>
+      <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="25" height="25"><path d="M13.5 13.5H10m3.5 0V10m0 3.5l-4-4m.5-8h3.5m0 0V5m0-3.5l-4 4M5 1.5H1.5m0 0V5m0-3.5l4 4m-4 4.5v3.5m0 0H5m-3.5 0l4-4" stroke="currentColor"></path></svg>
     </button>
   </div>
 
@@ -152,7 +133,7 @@
     <canvas id="canvas" tabindex="-1" class="unselectable"></canvas>
 
     <div id="dpad" class="unselectable">
-      <svg xmlns="https://static.wikia.nocookie.net/oneshot/images/1/1f/Niko_WME.jpg/revision/latest?cb=20220925190751" viewBox="0 0 72 72">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
         <path id="dpad-up" data-key="ArrowUp" d="M48,5.8C48,2.5,45.4,0,42,0H29.9C26.6,0,24,2.4,24,5.8V24h24V5.8z" />
         <path id="dpad-right" data-key="ArrowRight" d="M66.2,24H48v24h18.2c3.3,0,5.8-2.7,5.8-6V29.9C72,26.5,69.5,24,66.2,24z" />
         <path id="dpad-down" data-key="ArrowDown" d="M24,66.3c0,3.3,2.6,5.7,5.9,5.7H42c3.3,0,6-2.4,6-5.7V48H24V66.3z" />
@@ -167,7 +148,7 @@
     </div>
   </div>
 <script>
-
+console.log("IF YOU ARE SEEING THIS, IF YOU NOTICE ANY ERRORS WITH FILES RETURNING 404, THEY ARENT IMPORTANT TO THE MAIN GAME/ENGINE!")
  const originalOpen = XMLHttpRequest.prototype.open;
       XMLHttpRequest.prototype.open = function (method, url, ...rest) {
           url = url.startsWith("/") ? url.replace("/", "") : url;
@@ -208,33 +189,138 @@ function onPlayerSpriteUpdated() {}
 var globalPlayerData = {};
 function clearPlayerList() {
 }
-function loadingscreenremove() {
-        const loadingDiv = document.getElementById('load');
-        if (loadingDiv) {
-          setTimeout(() => {
-            loadingDiv.remove(); 
-          }, 1000);
-        }
-    }
-    document.addEventListener('DOMContentLoaded', loadingscreenremove);
-    function maybebadwifi() {
-setTimeout(() => {
-  const notloading = document.getElementById('notloading');
-  if (notloading) {
-    notloading.textContent = "you may have bad internet or the game isnt loading properly, try refreshing in a bit";
-  };
-    }, 5000);
-  }
-  maybebadwifi();
 </script>
-    <div class="load" id="load">
-      <img src="images/load/niko-oneshot.gif" alt="load">
-      <h1> loading time woahhhh</h1>
-      <p> port by arandomiperson on discord </p>
-        <p> credits to YNOProject's team for their work on the web port of legacy oneshot. </p>
-      <p id="notloading"> </p>
-      </div>
-    <div id="ui-theme-selector"></div>
+<script>
+    // --- External Audio Player Setup ---
+    let audioElement = null;
+
+    async function playBGM(url) {
+      // Stop current track
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.remove();
+      }
+
+      // Create new audio element
+      audioElement = document.createElement('audio');
+      audioElement.loop = true;
+      audioElement.volume = 0.5;
+
+      // If the engine requested the resource without an extension (common in RPG Maker),
+      // try common extensions so the browser can actually fetch the file.
+      const hasExt = /\.[a-z0-9]{1,5}$/i.test(url);
+      const candidates = hasExt ? [url] : [url + '.ogg', url + '.mp3', url + '.wav', url];
+
+      let chosen = null;
+      // Some servers block HEAD; instead, try to load metadata via a temporary Audio element.
+      async function testCandidate(candidate) {
+        return new Promise(resolve => {
+          const a = document.createElement('audio');
+          let settled = false;
+          const tidy = () => {
+            try { a.src = ''; } catch (e) {}
+            try { a.remove(); } catch (e) {}
+          };
+          const onSuccess = () => { if (!settled) { settled = true; tidy(); resolve(true); } };
+          const onFail = () => { if (!settled) { settled = true; tidy(); resolve(false); } };
+          a.addEventListener('loadedmetadata', onSuccess, { once: true });
+          a.addEventListener('error', onFail, { once: true });
+          // timeout in case server doesn't respond
+          const to = setTimeout(() => { if (!settled) { settled = true; tidy(); resolve(false); } }, 1200);
+          try {
+            a.preload = 'metadata';
+            a.src = candidate;
+            // some browsers will start loading immediately
+          } catch (e) {
+            clearTimeout(to);
+            resolve(false);
+          }
+        });
+      }
+
+      for (const candidate of candidates) {
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          if (await testCandidate(candidate)) { chosen = candidate; break; }
+        } catch (_) {}
+      }
+
+      if (!chosen) chosen = url;
+
+      audioElement.src = chosen;
+
+      // Attempt to play (requires user click/interaction in modern browsers)
+      audioElement.play().catch(e => {
+        console.warn("Autoplay failed. User must interact with the page to start audio.", e);
+      });
+    }
+
+    // A small dummy buffer to satisfy the WASM's VFS for intercepted audio files.
+    const DUMMY_BUFFER = new Uint8Array([0x00]);
+
+    // --- PATCHED onRequestFile (XHR-based) ---
+    var onRequestFile = (function() {
+        return function(path, callback, arg) {
+            const fullPath = path.replace(/^\.\//, '');
+            const isMusic = fullPath.includes('Music/');
+            const isSound = fullPath.includes('Sound/');
+
+            // 1. INTERCEPT AUDIO REQUESTS
+            if (isMusic || isSound) {
+                console.log("INTERCEPTED AUDIO request:", fullPath);
+                
+                if (isMusic) {
+                    // Start BGM playback using the browser's native audio API
+                    playBGM(fullPath);
+                }
+                
+                // Return dummy data immediately to satisfy the WASM's VFS 
+                // and prevent the WASM's broken audio decoder from running.
+                if (callback) {
+                    callback(DUMMY_BUFFER, arg);
+                }
+                return; 
+            }
+
+            // 2. STANDARD FILE LOADING (XHR for VFS files)
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', fullPath, true); // true for asynchronous
+            xhr.responseType = 'arraybuffer';
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Success: Return data to the WASM module
+                    const data = new Uint8Array(xhr.response);
+                    if (callback) {
+                        callback(data, arg);
+                    }
+                } else {
+                    // Failure (e.g., 404): Signal failure to the WASM module
+                    console.warn(`XHR File not found (${xhr.status}): ${fullPath}`);
+                    if (callback) {
+                        callback(null, arg);
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                console.error("XHR Network Error fetching:", fullPath);
+                if (callback) {
+                    callback(null, arg);
+                }
+            };
+
+            xhr.send();
+        };
+    })();
+
+    // (Keep onUpdateConnectionStatus here)
+    var onUpdateConnectionStatus = function(status) {
+        console.log("Connection Status Updated:", status);
+    };
+</script>
+</script>
+<div id="ui-theme-selector"></div>
 <div id="status"></div>
 <div id="uiThemesModal" class="modal">
     <div class="modalContent">
@@ -242,13 +328,6 @@ setTimeout(() => {
 <div id="partyTheme"></div>
 <div id="connStatusIcon"></div>
 <div id="connStatusText"></div>
-</div>
-<div id="viewport">
-    <canvas id="canvas"></canvas>
-    </div>
-<div id="controls">
-    <button id="controls-fullscreen">Fullscreen</button>
-</div>
 <script type="text/javascript" src="stupidpatch.js"></script>
 <script type="text/javascript" src="preloads.js"></script>
 <script type="text/javascript" src="thing.js"></script> 
@@ -256,102 +335,31 @@ setTimeout(() => {
 <script type="text/javascript" src="toast.js"></script>
 <script type="text/javascript" src="session.js"></script>
 <script type="text/javascript" src="system.js"></script>
-<script type="text/javascript" src="index.js"></script>
+<script type="text/javascript" src="easyrpg-player.js"></script>
 <script type="text/javascript" src="play.js"></script> 
 <script type="text/javascript" src="init.js"></script>
+
 <script>
+hasTouchscreen = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const preventNativeKeys = ['ArrowUp', 'ArrowDown', 'ArrowRight', 'ArrowLeft', ' ', 'F12'];
 const keys = new Map();
 const keysDown = new Map();
 const canvas = document.getElementById('canvas');
-easyrpgPlayer;
+ easyrpgPlayer;
 let lastTouchedId;
 
 // Launch the Player and configure it
 window.addEventListener('load', (event) => {
-      const originalFetch = window.fetch;
-      window.fetch = async function (input, init) {
-        if (input instanceof Request) {
-          input.url = input.url.startsWith("/") ? input.url.replace("/", "") : input.url;
-        } else {
-          input = input.startsWith("/") ? input.replace("/", "") : input;
-        }
-        return originalFetch(input, init);
-      };
-    console.log('typeof createEasyRpgPlayer:', typeof createEasyRpgPlayer);
-    console.log('window.createEasyRpgPlayer:', window.createEasyRpgPlayer);
-    
     createEasyRpgPlayer({
       game: undefined,
-      saveFs: undefined,
-      locateFile: function(path, prefix) {
-          return '/' + path;
-      }
+      saveFs: undefined
     }).then(function(Module) {
       // Module is ready
       easyrpgPlayer = Module;
       easyrpgPlayer.initApi();
       canvas.focus();
 
-      // Enable audio and set volumes immediately
-      console.log('Setting up audio...');
-      
-      try {
-        // Set volumes to maximum
-        easyrpgPlayer.api.setMusicVolume(100);
-        easyrpgPlayer.api.setSoundVolume(100);
-        console.log('j');
-      } catch(e) {
-        console.error('Failed to set volumes:', e);
-      }
-      
-      // Create AudioContext on first user interaction
-      let audioInitialized = false;
-      
-      const initAudio = function() {
-        if (audioInitialized) return;
-        
-        try {
-          // Make sure SDL2 AudioContext is running
-          if (easyrpgPlayer.SDL2 && easyrpgPlayer.SDL2.audioContext) {
-            if (easyrpgPlayer.SDL2.audioContext.state === 'suspended') {
-              easyrpgPlayer.SDL2.audioContext.resume().then(() => {
-                console.log(' SDL2 AudioContext resumed');
-              });
-            } else {
-              console.log(' SDL2 AudioContext already running');
-            }
-          }
-          
-          // Set volumes again after user interaction
-          easyrpgPlayer.api.setMusicVolume(100);
-          easyrpgPlayer.api.setSoundVolume(100);
-          
-          audioInitialized = true;
-          console.log(' Audio system fully initialized');
-        } catch (err) {
-          console.error('Failed to initialize audio:', err);
-        }
-      };
-      
-      // Initialize audio on click/keypress/touch
-      canvas.addEventListener('click', initAudio, { once: false });
-      canvas.addEventListener('keydown', initAudio, { once: false });
-      canvas.addEventListener('touchstart', initAudio, { once: false });
-      
-      // Hook error output for debugging
-      const originalPrintErr = easyrpgPlayer.printErr;
-      easyrpgPlayer.printErr = function(text) {
-        console.error('[EasyRPG]:', text);
-        originalPrintErr.call(this, text);
-      };
-      
-      console.log('Audio setup complete. Click the game to activate audio.');
-      console.log('Audio API available:', {
-        setMusicVolume: 'easyrpgPlayer.api.setMusicVolume(0-100)',
-        setSoundVolume: 'easyrpgPlayer.api.setSoundVolume(0-100)',
-        toggleMute: 'easyrpgPlayer.api.toggleMute()'
-      });
+      // Custom code here
     });
 });
 
@@ -522,11 +530,6 @@ if (hasTouchscreen) {
   }
 } else {
   // Prevent scrolling when pressing specific keys
-
-  // canvas.addEventListener('click', () => {
-  //   simulateKeyboardInput('Enter', 13);
-  // });
-}
   window.addEventListener('keydown', event => {
     if (preventNativeKeys.includes(event.key)) {
       event.preventDefault();
@@ -537,6 +540,12 @@ if (hasTouchscreen) {
     event.preventDefault();
     // simulateKeyboardInput('Escape', 27);
   });
+
+  // canvas.addEventListener('click', () => {
+  //   simulateKeyboardInput('Enter', 13);
+  // });
+}
+
 updateTouchControlsVisibility();
 </script>
 
